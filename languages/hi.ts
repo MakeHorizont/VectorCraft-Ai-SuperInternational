@@ -53,7 +53,17 @@ export const hi: TranslationDictionary = {
     generatedBy: "Gemini 3 Pro द्वारा निर्मित",
     emptyStateTitle: "इनपुट की प्रतीक्षा है",
     emptyStateDesc: "उत्पन्न कलाकृति यहां दिखाई देगी",
-    emptyStateDescShort: "कलाकृति"
+    emptyStateDescShort: "कलाकृति",
+    bgDark: "अंधेरा",
+    bgLight: "रोशनी",
+    bgGrid: "ग्रिड"
+  },
+  history: {
+    title: "उत्पादन लॉग",
+    empty: "अभी तक कोई इतिहास नहीं।",
+    restore: "पुनर्स्थापित",
+    delete: "हटाएं",
+    clearAll: "लॉग साफ़ करें"
   },
   refine: {
     label: "द्वंद्वात्मक परिष्करण (Aufhebung)",

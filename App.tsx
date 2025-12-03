@@ -4,19 +4,27 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { InputSection } from './components/InputSection';
 import { SvgPreview } from './components/SvgPreview';
 import { Header } from './components/Header';
+import { ProductionLog } from './components/ProductionLog';
 import { generateSvgFromPrompt } from './services/geminiService';
 import { GeneratedSvg, GenerationStatus, ApiError, GenerationOptions } from './types';
 import { AlertCircle, Globe, ChevronRight } from 'lucide-react';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { languages, LanguageCode } from './languages/index';
 
+const HISTORY_KEY = 'vectorcraft_history_v1';
+
 // --- Welcome / Language Selection Screen ---
 const WelcomeScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
-  const { setLanguage } = useLanguage();
+  const { setLanguage, currentLanguage } = useLanguage();
+  const [hasStoredLang, setHasStoredLang] = useState(false);
+
+  // If a language was restored from localstorage by the provider, we might want to skip this screen.
+  // But for now, let's allow the user to confirm or change. 
+  // Alternatively, we could auto-skip in AppLayout. 
 
   const handleSelect = (code: LanguageCode) => {
     setLanguage(code);
@@ -58,7 +66,7 @@ const WelcomeScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
         </div>
         
         <div className="text-center pt-8">
-           <p className="text-xs text-zinc-600 uppercase tracking-widest font-mono">System Ready v1.0</p>
+           <p className="text-xs text-zinc-600 uppercase tracking-widest font-mono">System Ready v1.1</p>
         </div>
       </div>
     </div>
@@ -69,8 +77,26 @@ const WelcomeScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
 const AppContent: React.FC = () => {
   const [status, setStatus] = useState<GenerationStatus>(GenerationStatus.IDLE);
   const [currentSvg, setCurrentSvg] = useState<GeneratedSvg | null>(null);
+  const [history, setHistory] = useState<GeneratedSvg[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const { t } = useLanguage();
+
+  // Load History on Mount
+  useEffect(() => {
+    const saved = localStorage.getItem(HISTORY_KEY);
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse history");
+      }
+    }
+  }, []);
+
+  // Save History on Update
+  useEffect(() => {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  }, [history]);
 
   const handleGenerate = async (options: GenerationOptions) => {
     setStatus(GenerationStatus.LOADING);
@@ -88,6 +114,8 @@ const AppContent: React.FC = () => {
       };
       
       setCurrentSvg(newSvg);
+      // Add to history (newest first)
+      setHistory(prev => [newSvg, ...prev].slice(0, 50)); // Keep last 50
       setStatus(GenerationStatus.SUCCESS);
     } catch (err: any) {
       setStatus(GenerationStatus.ERROR);
@@ -101,12 +129,25 @@ const AppContent: React.FC = () => {
   // Handler for Dialectical Aufhebung (Update existing SVG)
   const handleUpdateSvg = (newContent: string) => {
     if (currentSvg) {
-      setCurrentSvg({
+      const updatedSvg = {
         ...currentSvg,
         content: newContent,
         timestamp: Date.now() // Update version
-      });
+      };
+      setCurrentSvg(updatedSvg);
+      // We also add the refined version to history as a new node in the spiral
+      setHistory(prev => [updatedSvg, ...prev].slice(0, 50));
     }
+  };
+
+  const restoreFromHistory = (item: GeneratedSvg) => {
+    setCurrentSvg(item);
+    setStatus(GenerationStatus.SUCCESS);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const deleteFromHistory = (id: string) => {
+    setHistory(prev => prev.filter(i => i.id !== id));
   };
 
   return (
@@ -127,6 +168,7 @@ const AppContent: React.FC = () => {
           </div>
         )}
 
+        {/* Current Workspace */}
         {status === GenerationStatus.SUCCESS && currentSvg && (
           <SvgPreview 
             data={currentSvg} 
@@ -147,6 +189,15 @@ const AppContent: React.FC = () => {
              <p className="text-zinc-600 text-sm">{t.preview.emptyStateDesc}</p>
           </div>
         )}
+
+        {/* Production Log (History) */}
+        <ProductionLog 
+          history={history} 
+          onRestore={restoreFromHistory} 
+          onDelete={deleteFromHistory} 
+          onClear={() => setHistory([])}
+        />
+
       </main>
     </div>
   );
@@ -155,11 +206,26 @@ const AppContent: React.FC = () => {
 // --- Root Layout Manager ---
 const AppLayout: React.FC = () => {
   const [hasSelectedLanguage, setHasSelectedLanguage] = useState(false);
-  const { setLanguage } = useLanguage();
+  
+  // We can verify if language is already in storage to potentially skip welcome,
+  // but for now, let's keep the explicit check to ensure proper context.
+  // Actually, let's check localStorage inside the provider logic, but here we decide UI.
+  // To make it persistent, we check if the user has visited before.
+  
+  useEffect(() => {
+    const visited = localStorage.getItem('vectorcraft_visited');
+    if (visited) {
+      setHasSelectedLanguage(true);
+    }
+  }, []);
 
-  // If user hasn't explicitly selected a language in this session, show the welcome screen.
+  const handleStart = () => {
+    localStorage.setItem('vectorcraft_visited', 'true');
+    setHasSelectedLanguage(true);
+  };
+
   if (!hasSelectedLanguage) {
-    return <WelcomeScreen onStart={() => setHasSelectedLanguage(true)} />;
+    return <WelcomeScreen onStart={handleStart} />;
   }
 
   return <AppContent />;

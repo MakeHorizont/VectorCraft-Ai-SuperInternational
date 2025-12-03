@@ -53,7 +53,17 @@ export const ru: TranslationDictionary = {
     generatedBy: "Сгенерировано Gemini 3 Pro",
     emptyStateTitle: "Ожидание ввода",
     emptyStateDesc: "Сгенерированное изображение появится здесь",
-    emptyStateDescShort: "Область просмотра"
+    emptyStateDescShort: "Область просмотра",
+    bgDark: "Тёмный",
+    bgLight: "Светлый",
+    bgGrid: "Сетка"
+  },
+  history: {
+    title: "Журнал Производства",
+    empty: "История производства пуста.",
+    restore: "Восстановить",
+    delete: "Удалить",
+    clearAll: "Очистить журнал"
   },
   refine: {
     label: "Диалектическое Снятие (Aufhebung)",

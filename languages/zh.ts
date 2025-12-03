@@ -53,7 +53,17 @@ export const zh: TranslationDictionary = {
     generatedBy: "由 Gemini 3 Pro 生成",
     emptyStateTitle: "等待输入",
     emptyStateDesc: "生成的作品将显示在这里",
-    emptyStateDescShort: "艺术区"
+    emptyStateDescShort: "艺术区",
+    bgDark: "暗色",
+    bgLight: "亮色",
+    bgGrid: "网格"
+  },
+  history: {
+    title: "生产日志",
+    empty: "尚无生产记录。",
+    restore: "恢复",
+    delete: "删除",
+    clearAll: "清除日志"
   },
   refine: {
     label: "辩证扬弃 (Aufhebung)",

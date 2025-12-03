@@ -53,7 +53,17 @@ export const es: TranslationDictionary = {
     generatedBy: "Generado por Gemini 3 Pro",
     emptyStateTitle: "Esperando entrada",
     emptyStateDesc: "El arte generado aparecerá aquí",
-    emptyStateDescShort: "Área de arte"
+    emptyStateDescShort: "Área de arte",
+    bgDark: "Oscuro",
+    bgLight: "Claro",
+    bgGrid: "Cuadrícula"
+  },
+  history: {
+    title: "Registro de Producción",
+    empty: "Historial vacío.",
+    restore: "Restaurar",
+    delete: "Borrar",
+    clearAll: "Limpiar todo"
   },
   refine: {
     label: "Superación Dialéctica (Aufhebung)",

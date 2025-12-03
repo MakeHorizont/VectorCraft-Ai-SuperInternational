@@ -15,9 +15,16 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+const STORAGE_KEY = 'vectorcraft_lang_v1';
+
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Detect browser language or default to 'en'
+  // Detect browser language or default to 'en', but prefer localStorage
   const getInitialLanguage = (): LanguageCode => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && saved in translations) {
+      return saved as LanguageCode;
+    }
+
     const browserLang = navigator.language.split('-')[0];
     if (browserLang in translations) {
       return browserLang as LanguageCode;
@@ -26,6 +33,11 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>(getInitialLanguage);
+
+  // Persistence effect
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, currentLanguage);
+  }, [currentLanguage]);
 
   const value = {
     currentLanguage,

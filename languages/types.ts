@@ -57,6 +57,16 @@ export interface TranslationDictionary {
     emptyStateTitle: string;
     emptyStateDesc: string;
     emptyStateDescShort: string;
+    bgDark: string;
+    bgLight: string;
+    bgGrid: string;
+  };
+  history: {
+    title: string;
+    empty: string;
+    restore: string;
+    delete: string;
+    clearAll: string;
   };
   refine: {
     label: string;
